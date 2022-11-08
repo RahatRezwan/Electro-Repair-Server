@@ -22,11 +22,20 @@ const client = new MongoClient(uri, {
    useUnifiedTopology: true,
    serverApi: ServerApiVersion.v1,
 });
-client.connect((err) => {
-   const collection = client.db("test").collection("devices");
-   // perform actions on the collection object
-   client.close();
-});
+
+const run = async () => {
+   try {
+      const serviceCollection = client.db("Electro_Repair").collection("services");
+
+      app.post("/services", async (req, res) => {
+         const service = req.body;
+         const result = await serviceCollection.insertOne(service);
+         res.send(result);
+      });
+   } finally {
+   }
+};
+run().catch((error) => console.log(error));
 
 app.listen(port, () => {
    console.log(`Sever is running on port : ${port}`);
