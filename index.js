@@ -27,6 +27,9 @@ const run = async () => {
    try {
       const serviceCollection = client.db("Electro_Repair").collection("services");
 
+      const reviewCollection = client.db("Electro_Repair").collection("reviews");
+
+      /* post route for service */
       app.post("/services", async (req, res) => {
          const service = req.body;
          const result = await serviceCollection.insertOne(service);
@@ -56,6 +59,13 @@ const run = async () => {
          const query = { _id: ObjectId(id) };
          const service = await serviceCollection.findOne(query);
          res.send(service);
+      });
+
+      /* Post route for comment or review */
+      app.post("/reviews", async (req, res) => {
+         const review = req.body;
+         const result = await reviewCollection.insertOne(review);
+         res.send(result);
       });
    } finally {
    }
