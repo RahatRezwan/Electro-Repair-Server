@@ -71,9 +71,13 @@ const run = async () => {
       /* get method for reviews */
       app.get("/reviews", async (req, res) => {
          const serviceId = req.query.serviceId;
+         const email = req.query.email;
          let query = {};
          if (serviceId) {
             query = { serviceId: serviceId };
+         }
+         if (email) {
+            query = { userEmail: email };
          }
          const options = {
             sort: { date: -1 },
