@@ -35,15 +35,19 @@ const run = async () => {
 
       /* service api get route */
       app.get("/services", async (req, res) => {
-         const homeLimit = parseInt(req.query.homeLimit);
+         const size = parseInt(req.query.size);
+         const currentPage = parseInt(req.query.currentPage);
          const query = {};
          const options = {
             sort: { date: -1 },
          };
          const cursor = serviceCollection.find(query, options);
-
-         const services = await cursor.limit(homeLimit).toArray();
-         res.send(services);
+         const services = await cursor
+            .skip(currentPage * size)
+            .limit(size)
+            .toArray();
+         const count = await serviceCollection.countDocuments();
+         res.send({ count, services });
       });
    } finally {
    }
