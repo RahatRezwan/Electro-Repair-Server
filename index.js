@@ -32,6 +32,19 @@ const run = async () => {
          const result = await serviceCollection.insertOne(service);
          res.send(result);
       });
+
+      /* service api get route */
+      app.get("/services", async (req, res) => {
+         const homeLimit = parseInt(req.query.homeLimit);
+         const query = {};
+         const options = {
+            sort: { date: -1 },
+         };
+         const cursor = serviceCollection.find(query, options);
+
+         const services = await cursor.limit(homeLimit).toArray();
+         res.send(services);
+      });
    } finally {
    }
 };
