@@ -67,6 +67,18 @@ const run = async () => {
          const result = await reviewCollection.insertOne(review);
          res.send(result);
       });
+
+      /* get method for reviews */
+      app.get("/reviews", async (req, res) => {
+         const serviceId = req.query.serviceId;
+         let query = {};
+         if (serviceId) {
+            query = { serviceId: serviceId };
+         }
+         const cursor = reviewCollection.find(query);
+         const reviews = await cursor.toArray();
+         res.send(reviews);
+      });
    } finally {
    }
 };
