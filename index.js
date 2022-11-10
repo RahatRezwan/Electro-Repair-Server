@@ -86,6 +86,30 @@ const run = async () => {
          const reviews = await cursor.toArray();
          res.send(reviews);
       });
+
+      /* route to update a single review by id */
+      app.put("/reviews/:id", async (req, res) => {
+         const id = req.params.id;
+         const newComment = req.body;
+         console.log(newComment.editedComment);
+         const query = { _id: ObjectId(id) };
+         const updateDoc = {
+            $set: {
+               comment: newComment.editedComment,
+            },
+         };
+         const result = await reviewCollection.updateOne(query, updateDoc);
+         res.send(result);
+      });
+
+      /* Delete a review */
+      app.delete("/reviews/:id", async (req, res) => {
+         const id = req.params.id;
+         console.log(id);
+         const query = { _id: ObjectId(id) };
+         const result = await reviewCollection.deleteOne(query);
+         res.send(result);
+      });
    } finally {
    }
 };
