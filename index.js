@@ -24,6 +24,22 @@ const client = new MongoClient(uri, {
    serverApi: ServerApiVersion.v1,
 });
 
+/* verify access token */
+const verifyJWT = (req, res, next) => {
+   const authHeader = req.headers.authorization;
+   if (!authHeader) {
+      return res.status(401).send({ Message: "Unauthorized Access" });
+   }
+   const token = authHeader.split(" ")[1];
+   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+      if (err) {
+         return res.status(403).send({ Message: "Unauthorized Access" });
+      }
+      req.decoded = decoded;
+      next();
+   });
+};
+
 const run = async () => {
    try {
       const serviceCollection = client.db("Electro_Repair").collection("services");
@@ -33,7 +49,7 @@ const run = async () => {
       /* jwt token */
       app.post("/jwt", (req, res) => {
          const user = req.body;
-         const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "10h" });
+         const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "5s" });
          res.send({ token });
       });
 
@@ -77,10 +93,14 @@ const run = async () => {
       });
 
       /* get method for reviews */
-      app.get("/reviews", async (req, res) => {
+      app.get("/reviews", verifyJWT, async (req, res) => {
          const serviceId = req.query.serviceId;
          const email = req.query.email;
          const limit = parseInt(req.query.limit);
+         const decoded = req.decoded;
+         if (decoded.email !== email) {
+            return res.status(403).send({ message: "Unauthorized access" });
+         }
          let query = {};
          if (serviceId) {
             query = { serviceId: serviceId };
