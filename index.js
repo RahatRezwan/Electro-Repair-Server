@@ -46,6 +46,8 @@ const run = async () => {
 
       const reviewCollection = client.db("Electro_Repair").collection("reviews");
 
+      const blogCollection = client.db("Electro_Repair").collection("blogs");
+
       /* jwt token */
       app.post("/jwt", (req, res) => {
          const user = req.body;
@@ -147,6 +149,13 @@ const run = async () => {
          const id = req.params.id;
          const query = { _id: ObjectId(id) };
          const result = await reviewCollection.deleteOne(query);
+         res.send(result);
+      });
+
+      /* post route for blog */
+      app.post("/blogs", async (req, res) => {
+         const blog = req.body;
+         const result = await blogCollection.insertOne(blog);
          res.send(result);
       });
    } finally {
