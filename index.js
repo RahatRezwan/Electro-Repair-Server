@@ -1,6 +1,7 @@
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const express = require("express");
 const cors = require("cors");
+const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const port = process.env.PORT || 5000;
 
@@ -28,6 +29,13 @@ const run = async () => {
       const serviceCollection = client.db("Electro_Repair").collection("services");
 
       const reviewCollection = client.db("Electro_Repair").collection("reviews");
+
+      /* jwt token */
+      app.post("/jwt", (req, res) => {
+         const user = req.body;
+         const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "10h" });
+         res.send({ token });
+      });
 
       /* post route for service */
       app.post("/services", async (req, res) => {
@@ -72,6 +80,7 @@ const run = async () => {
       app.get("/reviews", async (req, res) => {
          const serviceId = req.query.serviceId;
          const email = req.query.email;
+         const limit = parseInt(req.query.limit);
          let query = {};
          if (serviceId) {
             query = { serviceId: serviceId };
@@ -83,7 +92,7 @@ const run = async () => {
             sort: { date: -1 },
          };
          const cursor = reviewCollection.find(query, options);
-         const reviews = await cursor.toArray();
+         const reviews = await cursor.limit(limit).toArray();
          res.send(reviews);
       });
 
@@ -91,7 +100,6 @@ const run = async () => {
       app.put("/reviews/:id", async (req, res) => {
          const id = req.params.id;
          const newComment = req.body;
-         console.log(newComment.editedComment);
          const query = { _id: ObjectId(id) };
          const updateDoc = {
             $set: {
@@ -105,7 +113,6 @@ const run = async () => {
       /* Delete a review */
       app.delete("/reviews/:id", async (req, res) => {
          const id = req.params.id;
-         console.log(id);
          const query = { _id: ObjectId(id) };
          const result = await reviewCollection.deleteOne(query);
          res.send(result);
