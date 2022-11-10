@@ -169,6 +169,14 @@ const run = async () => {
          const blogs = await cursor.toArray();
          res.send(blogs);
       });
+
+      /* Route a get a single blog */
+      app.get("/blogs/:id", async (req, res) => {
+         const id = req.params.id;
+         const query = { _id: ObjectId(id) };
+         const blog = await blogCollection.findOne(query);
+         res.send(blog);
+      });
    } finally {
    }
 };
