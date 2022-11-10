@@ -49,7 +49,7 @@ const run = async () => {
       /* jwt token */
       app.post("/jwt", (req, res) => {
          const user = req.body;
-         const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "5s" });
+         const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "10h" });
          res.send({ token });
       });
 
@@ -93,18 +93,30 @@ const run = async () => {
       });
 
       /* get method for reviews */
-      app.get("/reviews", verifyJWT, async (req, res) => {
+      app.get("/reviews", async (req, res) => {
          const serviceId = req.query.serviceId;
-         const email = req.query.email;
          const limit = parseInt(req.query.limit);
+         let query = {};
+         if (serviceId) {
+            query = { serviceId: serviceId };
+         }
+         const options = {
+            sort: { date: -1 },
+         };
+         const cursor = reviewCollection.find(query, options);
+         const reviews = await cursor.limit(limit).toArray();
+         res.send(reviews);
+      });
+
+      /* get method for reviews by email */
+      app.get("/reviews-by-email", verifyJWT, async (req, res) => {
+         const email = req.query.email;
          const decoded = req.decoded;
          if (decoded.email !== email) {
             return res.status(403).send({ message: "Unauthorized access" });
          }
          let query = {};
-         if (serviceId) {
-            query = { serviceId: serviceId };
-         }
+
          if (email) {
             query = { userEmail: email };
          }
@@ -112,7 +124,7 @@ const run = async () => {
             sort: { date: -1 },
          };
          const cursor = reviewCollection.find(query, options);
-         const reviews = await cursor.limit(limit).toArray();
+         const reviews = await cursor.toArray();
          res.send(reviews);
       });
 
