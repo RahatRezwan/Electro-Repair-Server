@@ -158,6 +158,17 @@ const run = async () => {
          const result = await blogCollection.insertOne(blog);
          res.send(result);
       });
+
+      /* Get route for blog */
+      app.get("/blogs", async (req, res) => {
+         const query = {};
+         const options = {
+            sort: { date: -1 },
+         };
+         const cursor = blogCollection.find(query, options);
+         const blogs = await cursor.toArray();
+         res.send(blogs);
+      });
    } finally {
    }
 };
