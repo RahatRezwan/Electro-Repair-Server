@@ -161,12 +161,13 @@ const run = async () => {
 
       /* Get route for blog */
       app.get("/blogs", async (req, res) => {
+         const size = parseInt(req.query.size);
          const query = {};
          const options = {
             sort: { date: -1 },
          };
          const cursor = blogCollection.find(query, options);
-         const blogs = await cursor.toArray();
+         const blogs = await cursor.limit(size).toArray();
          res.send(blogs);
       });
 
