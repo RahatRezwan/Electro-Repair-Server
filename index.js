@@ -79,6 +79,17 @@ const run = async () => {
          res.send({ count, services });
       });
 
+      /* service for home page only */
+      app.get("/servicesinhome", async (req, res) => {
+         const query = {};
+         const options = {
+            sort: { date: -1 },
+         };
+         const cursor = serviceCollection.find(query, options);
+         const services = await cursor.limit(3).toArray();
+         res.send(services);
+      });
+
       /* get a single service */
       app.get("/services/:id", async (req, res) => {
          const id = req.params.id;
